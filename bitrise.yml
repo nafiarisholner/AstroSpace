@@ -5,23 +5,20 @@ project_type: android
 
 app:
   envs:
-    - PROJECT_LOCATION: "."
+    - PROJECT_LOCATION: "./"
     - MODULE: "app"
     - GRADLEW_PATH: "$PROJECT_LOCATION/gradlew"
 
 trigger_map:
-  # Запуск при push
   - push_branch: "*"
     workflow: primary
-  # Запуск при Pull Request
   - pull_request_source_branch: "*"
     workflow: pr_check
 
 workflows:
-  # === Основной workflow (build + deploy) ===
   primary:
     description: |
-      Собирает Debug и Release APK, прогоняет тесты, загружает артефакты.
+      Основной workflow — собирает Debug и Release APK, прогоняет тесты.
     steps:
       - git-clone@8: {}
       - install-missing-android-tools@3:
@@ -30,26 +27,25 @@ workflows:
       - gradle-runner@2:
           title: Run Unit Tests
           inputs:
-            - gradle_task: ":app:testDebugUnitTest"
+            - gradle_task: ":$MODULE:testDebugUnitTest"
             - gradlew_path: "$GRADLEW_PATH"
       - gradle-runner@2:
           title: Build Debug APK
           inputs:
-            - gradle_task: ":app:assembleDebug"
+            - gradle_task: ":$MODULE:assembleDebug"
             - gradlew_path: "$GRADLEW_PATH"
       - gradle-runner@2:
           title: Build Release APK
           inputs:
-            - gradle_task: ":app:assembleRelease"
+            - gradle_task: ":$MODULE:assembleRelease"
             - gradlew_path: "$GRADLEW_PATH"
       - deploy-to-bitrise-io@2:
           inputs:
             - notify_user_groups: "everyone"
 
-  # === Workflow для Pull Requests ===
   pr_check:
     description: |
-      Прогоняет юнит-тесты и собирает Debug APK для проверки PR.
+      Workflow для Pull Requests — тесты и Debug-сборка.
     steps:
       - git-clone@8: {}
       - install-missing-android-tools@3:
@@ -58,11 +54,11 @@ workflows:
       - gradle-runner@2:
           title: Run Unit Tests
           inputs:
-            - gradle_task: ":app:testDebugUnitTest"
+            - gradle_task: ":$MODULE:testDebugUnitTest"
             - gradlew_path: "$GRADLEW_PATH"
       - gradle-runner@2:
           title: Build Debug APK
           inputs:
-            - gradle_task: ":app:assembleDebug"
+            - gradle_task: ":$MODULE:assembleDebug"
             - gradlew_path: "$GRADLEW_PATH"
       - deploy-to-bitrise-io@2: {}
