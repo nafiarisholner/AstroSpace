@@ -1,0 +1,84 @@
+workflows:
+  key:
+    steps:
+      - script@1:
+          title: Add Key
+          inputs:
+            - content: |-
+#!/bin/bash
+set -e
+
+# Путь для keystore
+KEYSTORE_PATH="$BITRISE_SOURCE_DIR/my-release-key.jks"
+
+# Параметры берём из Secrets Bitrise
+KEYSTORE_PASSWORD="FGGFGFDGDSGDSGDSH"
+KEY_PASSWORD="FGGFGFDGDSGDSGDSH"
+KEY_ALIAS="fhfdgdsgds"
+DNAME="${DNAME:-CN=852, OU=MS, O=sf, L=City, S=Region, C=JD}"
+
+# Проверяем, существует ли keystore
+if [ -f "$KEYSTORE_PATH" ]; then
+  echo "✅ Keystore уже существует: $KEYSTORE_PATH"
+else
+  echo "⚙️ Keystore не найден. Создаём новый..."
+  keytool -genkeypair -v \
+    -keystore "$KEYSTORE_PATH" \
+    -storepass "$KEYSTORE_PASSWORD" \
+    -keypass "$KEY_PASSWORD" \
+    -keyalg RSA -keysize 2048 -validity 10000 \
+    -alias "$KEY_ALIAS" \
+    -dname "$DNAME"
+  echo "✅ Keystore создан: $KEYSTORE_PATH"
+fi
+
+# Копируем в директорию deploy для скачивания через артефакты
+mkdir -p "$BITRISE_DEPLOY_DIR"
+cp "$KEYSTORE_PATH" "$BITRISE_DEPLOY_DIR/"
+
+echo "📦 Keystore готов и доступен для скачивания как артефакт"
+       - deploy-to-bitrise-io@2:
+          title: Deploy Key to Bitrise
+
+
+  # --- Сборка .aab (release) ---
+  build_aab:
+    steps:
+      - git-clone@8: {}
+      
+      - gradle-runner@2:
+          title: Build AAB (bundleRelease)
+          inputs:
+            - gradle_task: "bundleRelease"
+
+      - sign-apk@1:
+          title: Sign Android App (AAB)
+          inputs:
+            - use_apk_signer: "true"
+            # Пример настройки для Bitrise переменных:
+            # - keystore_url: "$BITRISEIO_ANDROID_KEYSTORE_URL"
+            # - keystore_password: "$BITRISEIO_ANDROID_KEYSTORE_PASSWORD"
+            # - keystore_alias: "$BITRISEIO_ANDROID_KEYSTORE_ALIAS"
+            # - private_key_password: "$BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD"
+
+      - deploy-to-bitrise-io@2:
+          title: Deploy AAB to Bitrise
+
+  # --- Сборка .apk (debug) ---
+  build_debug_apk:
+    steps:
+      - git-clone@8: {}
+      
+      - gradle-runner@2:
+          title: Build Debug APK
+          inputs:
+            - gradle_task: "assembleDebug"
+
+      - sign-apk@1:
+          title: Sign Android App (Debug)
+          inputs:
+            - use_apk_signer: "true"
+            # При необходимости добавь переменные для подписи .apk
+
+      - deploy-to-bitrise-io@2:
+          title: Deploy Debug APK to Bitrise
