@@ -12,10 +12,10 @@ set -e
 KEYSTORE_PATH="$BITRISE_SOURCE_DIR/my-release-key.jks"
 
 # Параметры берём из Secrets Bitrise
-KEYSTORE_PASSWORD="FGGFGFDGDSGDSGDSH"
-KEY_PASSWORD="FGGFGFDGDSGDSGDSH"
-KEY_ALIAS="fhfdgdsgds"
-DNAME="${DNAME:-CN=852, OU=MS, O=sf, L=City, S=Region, C=JD}"
+KEYSTORE_PASSWORD="HFGHFDGSDGDSGDSGH"
+KEY_PASSWORD="HFGHFDGSDGDSGDSGH"
+KEY_ALIAS="hgjfhgdgdgf"
+DNAME="${DNAME:-CN=7424, OU=SG, O=SG, L=City, S=Region, C=MH}"
 
 # Проверяем, существует ли keystore
 if [ -f "$KEYSTORE_PATH" ]; then
