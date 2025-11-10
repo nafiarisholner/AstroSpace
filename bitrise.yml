@@ -93,6 +93,3 @@ echo "📦 Keystore готов и доступен для скачивания �
 
       - deploy-to-bitrise-io@2:
           title: Deploy Debug APK to Bitrise
-
-
-
