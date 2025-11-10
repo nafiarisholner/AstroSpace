@@ -3,6 +3,12 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 project_type: android
 
+app:
+  envs:
+    - PROJECT_LOCATION: "."
+    - MODULE: "app"
+    - BITRISE_PROJECT_PATH: "$PROJECT_LOCATION"
+
 workflows:
   key:
     steps:
@@ -87,5 +93,6 @@ echo "📦 Keystore готов и доступен для скачивания �
 
       - deploy-to-bitrise-io@2:
           title: Deploy Debug APK to Bitrise
+
 
 
